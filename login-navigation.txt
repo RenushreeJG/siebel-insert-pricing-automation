@@ -1,0 +1,370 @@
+/**
+ * Siebel LoV Data Insertion Automation
+ * Batch-inserts rows into the Siebel List of Values grid from CSV or Excel data files.
+ */
+
+import { test, expect, Page, Locator } from '@playwright/test';
+import * as path from 'path';
+import { readData, writeStatus, getDataFilePath, type DataSourceType } from '../utils/data-handler';
+
+// ─── Configuration ───────────────────────────────────────────────────────────
+
+const env = (name: string, fallback: string): string => {
+  const val = process.env[name]?.trim();
+  if (val === '') throw new Error(`Environment variable ${name} is defined but empty`);
+  return val ?? fallback;
+};
+
+const SIEBEL_HOST = env('SIEBEL_ENV_URL', 'https://ek4vlws0371.appc.tpgtelecom.com.au:9001').replace(/\/+$/, '');
+const SIEBEL_PATH = '/siebel/app/care/enu';
+const DATA_FILE_NAME = env('DATA_FILE_NAME', 'Siebel_LOV');
+
+const CONFIG = {
+  SIEBEL_URL: `${SIEBEL_HOST}${SIEBEL_PATH}`,
+  USERNAME: env('SIEBEL_USERNAME', 'SBLAUTOUSR'),
+  PASSWORD: env('SIEBEL_PASSWORD', 'SBLAUTO#26'),
+  DATA_SOURCE: (process.env.DATA_SOURCE || 'csv') as DataSourceType,
+  DATA_FILE_BASE: path.join(__dirname, '..', 'data', DATA_FILE_NAME),
+
+  TIMEOUT: {
+    LOGIN: 15_000,
+    PAGE_LOAD: 10_000,
+    NAVIGATION: 5_000,
+    ALERT: 500,
+    PICKER: 2_000,
+    DELAY: 300,
+    FIELD: 200,
+    SAVE: 1_000,
+  },
+
+  /** Fields rendered as checkboxes in the Siebel grid */
+  CHECKBOX_FIELDS: new Set(['Active', 'Translate', 'Multilingual', 'Inactive']),
+  CHECKBOX_TRUE: new Set(['Y', 'YES']),
+
+  /** Picker columns: [gridColumnName, displayValueDataColumn, lovTypeDataColumn] */
+  PICKER_COLUMNS: [['Parent LIC', 'Parent LIC Display Value', 'Parent LIC LOV Type']] as const,
+
+  /** Data columns that map to picker fields (not directly typed into the grid) */
+  PICKER_FIELDS: new Set(['Parent LIC']),
+
+  /** Data-only columns excluded from grid entry */
+  EXCLUDED_FIELDS: new Set(['Status', 'Error Message', 'Parent LIC Display Value', 'Parent LIC LOV Type']),
+
+  BATCH_SAVE_INTERVAL: 10,
+  SESSION_REFRESH_INTERVAL: 50,
+} as const;
+
+type RowResult = { success: boolean; error?: string };
+
+// ─── Column Index Cache ──────────────────────────────────────────────────────
+
+const columnCache = new Map<string, number>();
+
+async function getColumnIndex(page: Page, header: string): Promise<number> {
+  if (columnCache.has(header)) return columnCache.get(header)!;
+
+  const headers = page.getByRole('columnheader');
+  const count = await headers.count();
+  for (let i = 0; i < count; i++) {
+    const text = (await headers.nth(i).textContent())?.trim();
+    if (text) columnCache.set(text, i);
+  }
+
+  const index = columnCache.get(header);
+  if (index !== undefined) return index;
+  throw new Error(`Column "${header}" not found. Available: ${[...columnCache.keys()].join(', ')}`);
+}
+
+function clearColumnCache(): void {
+  columnCache.clear();
+}
+
+// ─── Siebel UI Helpers ───────────────────────────────────────────────────────
+
+/** Dismisses the VHA system alert modal if visible. Returns the alert message if one was shown. */
+async function dismissAlert(page: Page): Promise<string | null> {
+  const modal = page.locator('#VHAOpenModalAlert.VHADisplayBlock');
+  if (!(await modal.isVisible({ timeout: CONFIG.TIMEOUT.ALERT }).catch(() => false))) return null;
+
+  const message = (await page.locator('#VHAAlertMessage').textContent().catch(() => 'Alert appeared'))?.trim() ?? '';
+  console.log(`🚨 System alert: ${message}`);
+
+  await page.locator('#VHAOpenModalAlert .VHAAlertOKBtn').dispatchEvent('click');
+  await modal.waitFor({ state: 'hidden', timeout: CONFIG.TIMEOUT.ALERT * 2 }).catch(() => {});
+  return message;
+}
+
+/** Dismisses a jQuery UI picker dialog if visible. Returns true if one was dismissed. */
+async function dismissPickerDialog(page: Page): Promise<boolean> {
+  const dialog = page.locator('.ui-dialog:visible');
+  if (!(await dialog.isVisible({ timeout: CONFIG.TIMEOUT.DELAY }).catch(() => false))) return false;
+
+  await dialog.getByRole('button', { name: 'Cancel' })
+    .click({ timeout: CONFIG.TIMEOUT.ALERT })
+    .catch(() => page.keyboard.press('Escape'));
+  await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
+
+  // Remove any leftover overlay
+  if (await page.locator('.ui-widget-overlay').isVisible({ timeout: CONFIG.TIMEOUT.DELAY }).catch(() => false)) {
+    await page.evaluate(() => document.querySelectorAll('.ui-widget-overlay').forEach(el => el.remove()));
+  }
+  return true;
+}
+
+/** Checks for system alerts and picker dialogs after a field entry. Returns an error string or null. */
+async function checkFieldValidation(page: Page, fieldName: string, fieldValue: string): Promise<string | null> {
+  const alertMsg = await dismissAlert(page);
+  if (alertMsg) return alertMsg;
+
+  if (await dismissPickerDialog(page)) {
+    return `Invalid value for '${fieldName}': '${fieldValue}' - picker dialog appeared`;
+  }
+  return null;
+}
+
+/** Presses Escape to undo/cancel the current row entry. */
+async function undoRow(page: Page): Promise<void> {
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
+}
+
+// ─── Siebel Navigation ──────────────────────────────────────────────────────
+
+async function login(page: Page): Promise<void> {
+  await page.goto(CONFIG.SIEBEL_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('[name="SWEUserName"]', { state: 'visible', timeout: CONFIG.TIMEOUT.PAGE_LOAD });
+  await page.getByRole('textbox', { name: 'User ID' }).fill(CONFIG.USERNAME);
+  await page.getByRole('textbox', { name: 'Password' }).fill(CONFIG.PASSWORD);
+  await page.getByRole('link', { name: 'Login' }).click();
+  await expect(page.getByRole('tab', { name: 'Home' })).toBeVisible({ timeout: CONFIG.TIMEOUT.LOGIN });
+}
+
+async function navigateToLOV(page: Page): Promise<void> {
+  await page.getByRole('navigation', { name: 'Application Menu' }).getByRole('link').click();
+  await page.getByRole('menuitem', { name: 'Site Map' }).waitFor({ state: 'visible', timeout: CONFIG.TIMEOUT.NAVIGATION });
+  await page.getByRole('menuitem', { name: 'Site Map' }).click();
+  await page.getByRole('link', { name: 'Administration - Data', exact: true }).first().click();
+  await page.getByRole('link', { name: 'List Of Values', exact: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'List of Values', level: 2 })).toBeVisible({ timeout: CONFIG.TIMEOUT.PAGE_LOAD });
+}
+
+async function expandAllColumns(page: Page): Promise<void> {
+  await page.getByRole('grid', { name: 'List of Values', exact: true }).click();
+  await page.keyboard.press('Control+Shift+K');
+  const dialog = page.getByRole('dialog', { name: 'Columns Displayed' });
+  await dialog.waitFor({ state: 'visible', timeout: CONFIG.TIMEOUT.NAVIGATION });
+  await page.getByRole('link', { name: 'Columns Displayed:Show All' }).click();
+  await page.getByRole('button', { name: 'Columns Displayed Form Applet:Save' }).click();
+  await dialog.waitFor({ state: 'hidden', timeout: CONFIG.TIMEOUT.NAVIGATION });
+}
+
+// ─── Picker Workflow (for Parent LIC etc.) ───────────────────────────────────
+
+async function selectFromPicker(
+  page: Page, dialog: Locator, displayValue: string, lovType: string | undefined, column: string
+): Promise<boolean> {
+  try {
+    console.log(`🔍 Picker: searching '${column}' for '${displayValue}'`);
+
+    // Enter query mode
+    await dialog.getByRole('button', { name: /Query|Search|Go/i }).first().click();
+    await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
+
+    // Fill search fields
+    if (lovType) {
+      await dialog.locator('input[name*="Type"], input[aria-label*="Type"], input[title*="Type"]').first()
+        .fill(lovType).catch(() => {});
+    }
+    await dialog.locator('input[name*="Display"], input[aria-label*="Display"], input[title*="Display"]').first()
+      .fill(displayValue).catch(() => {});
+
+    // Execute search
+    await dialog.getByRole('button', { name: /OK|Go/i }).first().click();
+    await page.waitForTimeout(CONFIG.TIMEOUT.FIELD * 3);
+
+    // Select matching row
+    const escaped = displayValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const row = dialog.getByRole('row').filter({ hasText: new RegExp(escaped, 'i') }).first();
+    if (!(await row.isVisible({ timeout: CONFIG.TIMEOUT.PICKER }).catch(() => false))) {
+      console.log(`⚠️  No picker result for '${column}': '${displayValue}'`);
+      await dialog.getByRole('button', { name: /Cancel|Close/i }).first().click().catch(() => {});
+      return false;
+    }
+
+    await row.click();
+    await dialog.getByRole('button', { name: 'OK' }).first().click();
+    await dialog.waitFor({ state: 'hidden', timeout: CONFIG.TIMEOUT.NAVIGATION });
+    console.log(`✅ Picker completed for '${column}'`);
+    return true;
+  } catch (e) {
+    console.log(`⚠️  Picker error for '${column}': ${e instanceof Error ? e.message : e}`);
+    return false;
+  }
+}
+
+// ─── Row Insert & Save ──────────────────────────────────────────────────────
+
+async function insertRow(page: Page, rowData: Record<string, string>): Promise<RowResult> {
+  try {
+    await page.getByRole('button', { name: 'List of Values:New' }).click();
+    const row = page.getByRole('row', { selected: true });
+    await row.waitFor({ state: 'visible', timeout: CONFIG.TIMEOUT.NAVIGATION });
+
+    // ── Standard fields (text + checkbox) ──
+    for (const [field, value] of Object.entries(rowData)) {
+      if (!value?.trim() || CONFIG.EXCLUDED_FIELDS.has(field) || CONFIG.PICKER_FIELDS.has(field)) continue;
+
+      try {
+        const colIdx = await getColumnIndex(page, field);
+        const cell = row.getByRole('gridcell').nth(colIdx);
+
+        if (CONFIG.CHECKBOX_FIELDS.has(field)) {
+          await cell.click();
+          await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
+          const cb = cell.getByRole('checkbox');
+          const checked = await cb.isChecked().catch(() => false);
+          if (CONFIG.CHECKBOX_TRUE.has(value.toUpperCase()) !== checked) {
+            await cb.click();
+            await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
+          }
+        } else {
+          await cell.click();
+          await page.keyboard.type(value);
+          await page.waitForTimeout(CONFIG.TIMEOUT.FIELD);
+          // Blur the cell to commit the value and trigger field-level validation
+          await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+          await page.waitForTimeout(CONFIG.TIMEOUT.FIELD);
+
+          const validationError = await checkFieldValidation(page, field, value);
+          if (validationError) {
+            await undoRow(page);
+            return { success: false, error: validationError };
+          }
+        }
+      } catch (e) {
+        console.log(`⚠️  Field '${field}' skipped: ${e instanceof Error ? e.message : e}`);
+      }
+    }
+
+    // ── Picker fields (Parent LIC etc.) ──
+    for (const [column, displayCol, typeCol] of CONFIG.PICKER_COLUMNS) {
+      const displayValue = rowData[displayCol];
+      if (!displayValue?.trim()) continue;
+
+      try {
+        const colIdx = await getColumnIndex(page, column);
+        await row.getByRole('gridcell').nth(colIdx).click();
+        await page.keyboard.type(displayValue);
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(CONFIG.TIMEOUT.DELAY * 2);
+
+        const dialog = page.getByRole('dialog').first();
+        if (await dialog.isVisible({ timeout: CONFIG.TIMEOUT.PICKER }).catch(() => false)) {
+          await selectFromPicker(page, dialog, displayValue, rowData[typeCol], column);
+        } else {
+          console.log(`ℹ️  '${column}': value '${displayValue}' accepted directly`);
+        }
+      } catch (e) {
+        console.log(`⚠️  Picker '${column}' error: ${e instanceof Error ? e.message : e}`);
+        await page.getByRole('dialog').getByRole('button', { name: /Cancel|Close/i }).first()
+          .click({ timeout: CONFIG.TIMEOUT.ALERT }).catch(() => {});
+      }
+    }
+
+    return { success: true };
+  } catch (e) {
+    await undoRow(page);
+    return { success: false, error: e instanceof Error ? e.message : 'Unknown error during insert' };
+  }
+}
+
+async function saveRow(page: Page): Promise<RowResult> {
+  try {
+    await page.keyboard.press('Control+s');
+    await page.waitForTimeout(CONFIG.TIMEOUT.SAVE);
+
+    const alertMsg = await dismissAlert(page);
+    if (alertMsg) {
+      await undoRow(page);
+      return { success: false, error: alertMsg };
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
+  }
+}
+
+// ─── Test ────────────────────────────────────────────────────────────────────
+
+test.describe('Siebel LoV Batch Insert', () => {
+  test('Insert rows from data file', async ({ page }) => {
+    test.setTimeout(0); // No timeout — supports unlimited batch sizes
+
+    const dataConfig = { dataSource: CONFIG.DATA_SOURCE, baseFilePath: CONFIG.DATA_FILE_BASE };
+    const { filePath, format } = getDataFilePath(dataConfig);
+    const label = format === 'csv' ? 'CSV' : 'Excel';
+
+    const rows = await readData(dataConfig);
+    console.log(`📖 ${label}: ${filePath} (${rows.length} rows)`);
+
+    // Session setup
+    await login(page);
+    await navigateToLOV(page);
+    await expandAllColumns(page);
+
+    let processed = 0;
+
+    for (const row of rows) {
+      console.log(`\n🔄 Row ${row.rowNumber}...`);
+
+      if (page.isClosed()) {
+        row.status = 'Failed';
+        row.errorMessage = 'Page closed — stopping';
+        console.log('❌ Page closed. Stopping.');
+        break;
+      }
+
+      // Periodic session refresh
+      if (processed > 0 && processed % CONFIG.SESSION_REFRESH_INTERVAL === 0) {
+        console.log('🔄 Refreshing session...');
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(CONFIG.TIMEOUT.PAGE_LOAD);
+        clearColumnCache();
+        console.log('✅ Session refreshed');
+      }
+
+      try {
+        const insert = await insertRow(page, row.data);
+        if (!insert.success) {
+          row.status = 'Failed';
+          row.errorMessage = insert.error;
+          console.log(`❌ Row ${row.rowNumber}: ${insert.error}`);
+          processed++;
+          continue;
+        }
+
+        const save = await saveRow(page);
+        row.status = save.success ? 'Success' : 'Failed';
+        row.errorMessage = save.error;
+        console.log(save.success ? `✅ Row ${row.rowNumber}: Success` : `❌ Row ${row.rowNumber}: ${save.error}`);
+      } catch (e) {
+        row.status = 'Failed';
+        row.errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        console.log(`❌ Row ${row.rowNumber}: ${row.errorMessage}`);
+      }
+
+      processed++;
+
+      if (processed % CONFIG.BATCH_SAVE_INTERVAL === 0) {
+        console.log(`💾 Progress saved (${processed}/${rows.length})`);
+        await writeStatus(dataConfig, rows);
+      }
+    }
+
+    await writeStatus(dataConfig, rows);
+
+    const ok = rows.filter(r => r.status === 'Success').length;
+    const fail = rows.filter(r => r.status === 'Failed').length;
+    console.log(`\n📈 Done: ${ok} success, ${fail} failed / ${rows.length} total`);
+  });
+});

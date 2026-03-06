@@ -1,0 +1,365 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - img "Siebel eCommunications for Mobile Carriers - Australia-NNCARE" [ref=e6]
+        - navigation "Application Menu" [ref=e7]:
+          - link "" [ref=e8] [cursor=pointer]:
+            - /url: javascript:;
+          - menubar [ref=e9]:
+            - menuitem "File" [ref=e10] [cursor=pointer]
+            - menuitem "Edit" [ref=e11] [cursor=pointer]
+            - menuitem "View" [ref=e12] [cursor=pointer]
+            - menuitem "Navigate" [ref=e13] [cursor=pointer]
+            - menuitem "Query" [ref=e14] [cursor=pointer]
+            - menuitem "Tools" [ref=e15] [cursor=pointer]
+            - menuitem "Help" [ref=e16] [cursor=pointer]
+            - menuitem "Site Map" [ref=e17] [cursor=pointer]
+            - menuitem "Tasks" [ref=e18] [cursor=pointer]
+            - menuitem "iHelp" [ref=e19] [cursor=pointer]
+            - menuitem "Quick Links" [ref=e20] [cursor=pointer]
+        - text:  󦔳
+    - text:        
+    - list [ref=e2378]:
+      - listitem [ref=e2379]:
+        - generic [ref=e2380]: "Product:"
+    - generic [ref=e30]:
+      - navigation [ref=e31]:
+        - tablist [ref=e32]:
+          - tab "Home" [ref=e33]:
+            - generic [ref=e34] [cursor=pointer]: Home
+          - tab "Connection" [ref=e36]:
+            - generic [ref=e37] [cursor=pointer]: Connection
+          - tab "Service Request" [ref=e39]:
+            - generic [ref=e40] [cursor=pointer]: Service Request
+          - tab "Customer Accounts" [ref=e42]:
+            - generic [ref=e43] [cursor=pointer]: Customer Accounts
+          - tab "Assets" [ref=e45]:
+            - generic [ref=e46] [cursor=pointer]: Assets
+          - tab "CVP Operations" [ref=e48]:
+            - generic [ref=e49] [cursor=pointer]: CVP Operations
+          - tab "Administration - Product" [expanded] [selected] [ref=e51]:
+            - generic [ref=e52]: Administration - Product
+          - listitem [ref=e54]:
+            - combobox "First Level View Bar" [ref=e55]:
+              - option "Sales\\Decline Information"
+              - option "Activities"
+              - option "Assets"
+              - option "Billing Adjustments"
+              - option "Bulk Processing"
+              - option "IMEI List"
+              - option "Handset Matrix"
+              - option "Logistics Matrix"
+              - option "Offer Matrix"
+              - option "Sales Order"
+              - option "Multi-Site Quotes"
+              - option "Dashboard"
+              - option "Disputes"
+              - option "Corporate Account Export"
+              - option "Orders"
+              - option "Product Matrix"
+              - option "Quarantine"
+              - option "Recharge Card"
+              - option "Resource Management"
+              - option "Prospects"
+              - option "Quotes"
+              - option "Trouble Tickets"
+              - option "Data Administration"
+              - option "Price Matrix"
+              - option "Agreements"
+              - option "MPP Compliance Admin Screen"
+              - option "Rewards Offer Matrix"
+              - option "UNISIM Blacklist IDs"
+              - option "Billing Accounts"
+              - option "Commercial Offers"
+              - option "Customer Directory"
+              - option "SMS Matrix"
+              - option "Sales Calculator"
+              - option "Ring and Collect Dashboard"
+      - navigation [ref=e56]:
+        - tablist [ref=e57]:
+          - tab "Products" [expanded] [selected] [ref=e58]:
+            - generic [ref=e59]: Products
+          - tab "Product Definitions" [ref=e60]:
+            - generic [ref=e61] [cursor=pointer]: Product Definitions
+          - tab "Product Classes" [ref=e62]:
+            - generic [ref=e63] [cursor=pointer]: Product Classes
+          - tab "Attribute Definitions" [ref=e64]:
+            - generic [ref=e65] [cursor=pointer]: Attribute Definitions
+          - tab "Workspace Projects" [ref=e66]:
+            - generic [ref=e67] [cursor=pointer]: Workspace Projects
+          - tab "Product Promotions" [ref=e68]:
+            - generic [ref=e69] [cursor=pointer]: Product Promotions
+          - tab "Promotion Groups" [ref=e70]:
+            - generic [ref=e71] [cursor=pointer]: Promotion Groups
+          - tab "Eligibility and Compatibility Matrices" [ref=e72]:
+            - generic [ref=e73] [cursor=pointer]: Eligibility and Compatibility Matrices
+          - listitem [ref=e74]:
+            - combobox "Second Level View Bar" [ref=e75]:
+              - option "Product Catalog"
+              - option "Product Lines"
+              - option "External Products"
+              - option "Cache Administration"
+              - option "Favorites"
+              - option "Disclosure"
+              - option "Product Favorites"
+              - option "Schedule PID Activities"
+              - option "Schedule PMS Activities"
+              - option "PMS Account Product"
+    - text: 󦏿 󦐀 󦑕 󦔑 󦐢 󦑍 󦑎 󦑦 󥿿   
+    - generic [ref=e77]:
+      - text:      
+      - main "Product Detail Price Lists Administration" [ref=e2131]:
+        - generic [ref=e2381]:
+          - table:
+            - rowgroup:
+              - row
+          - generic [ref=e2382]:
+            - link "Test3":
+              - /url: "#SWEApplet1"
+            - region [ref=e2383]:
+              - form "Applet" [ref=e2384]:
+                - generic [ref=e2386]:
+                  - generic [ref=e2387]:
+                    - heading "Test3" [level=2] [ref=e2388]:
+                      - generic "Test3" [ref=e2389]:
+                        - generic [ref=e2390]: Test3
+                    - button "Product Form Applet:New" [ref=e2391] [cursor=pointer]
+                    - button "Product Form Applet:Query" [ref=e2392] [cursor=pointer]
+                    - generic [ref=e2393]:
+                      - 'button "Product Form Applet: Menu" [ref=e2396] [cursor=pointer]'
+                      - link "Product Form Applet:Previous record" [ref=e2398] [cursor=pointer]:
+                        - /url: javascript:void(0)
+                        - generic "Product Form Applet:Previous record":
+                          - img "Product Form Applet:Previous record"
+                      - generic [ref=e2399]: 1 of 1+
+                      - link "Product Form Applet:Next Record" [ref=e2401] [cursor=pointer]:
+                        - /url: javascript:void(0)
+                        - generic "Product Form Applet:Next Record" [ref=e2402]:
+                          - img "Product Form Applet:Next Record"
+                      - link "Product Form Applet:Show More" [ref=e2405] [cursor=pointer]:
+                        - /url: javascript:void(0)
+                        - generic "Product Form Applet:Show More" [ref=e2406]:
+                          - img "Product Form Applet:Show More"
+                  - generic [ref=e2409]:
+                    - generic [ref=e2411]: Definitions
+                    - generic [ref=e2412]:
+                      - generic [ref=e2413]: Product
+                      - text: ":"
+                      - generic "Required" [ref=e2414]:
+                        - text: 
+                        - img "Required"
+                    - textbox "Product" [ref=e2416]: Test3
+                    - generic [ref=e2417]:
+                      - generic [ref=e2418]: "Part #"
+                      - text: ":"
+                    - 'textbox "Part #" [ref=e2420]'
+                    - generic [ref=e2421]:
+                      - generic [ref=e2422]: Price Type
+                      - text: ":"
+                      - generic "Required" [ref=e2423]:
+                        - text: 
+                        - img "Required"
+                    - combobox "Price Type" [ref=e2425]: One-Time
+                    - generic [ref=e2427]:
+                      - generic [ref=e2428]: Organization
+                      - text: ":"
+                    - generic [ref=e2429]:
+                      - textbox "Organization" [ref=e2430]: Vodafone AU
+                      - generic "Press F2 for Multiple Selection Field" [ref=e2431] [cursor=pointer]
+                    - generic [ref=e2432]:
+                      - generic [ref=e2433]: Description
+                      - text: ":"
+                    - textbox "Description" [ref=e2435]
+                    - generic [ref=e2436]:
+                      - generic [ref=e2437]: UOM
+                      - text: ":"
+                    - combobox "UOM" [ref=e2439]
+                    - generic [ref=e2441]:
+                      - generic [ref=e2442]: Status
+                      - text: ":"
+                    - combobox "Status" [ref=e2444]
+                    - generic [ref=e2446]:
+                      - generic [ref=e2447]: Structure Type
+                      - text: ":"
+                    - combobox "Structure Type" [ref=e2449]: None
+                    - generic [ref=e2451]:
+                      - generic [ref=e2452]: Check Eligibility
+                      - text: ":"
+                    - checkbox "Check Eligibility" [ref=e2454]
+                    - generic [ref=e2455]:
+                      - generic [ref=e2456]: Orderable
+                      - text: ":"
+                    - checkbox "Orderable" [checked] [ref=e2458]
+                    - generic [ref=e2459]:
+                      - generic [ref=e2460]: Sales Product
+                      - text: ":"
+                    - checkbox "Sales Product" [checked] [ref=e2462]
+                    - generic [ref=e2463]:
+                      - generic [ref=e2464]: Type
+                      - text: ":"
+                    - combobox "Type" [ref=e2466]
+                    - generic [ref=e2468]:
+                      - generic [ref=e2469]: Inclusive Eligibility
+                      - text: ":"
+                    - checkbox "Inclusive Eligibility" [ref=e2471]
+                    - generic [ref=e2472]:
+                      - generic [ref=e2473]: Track as Asset
+                      - text: ":"
+                    - checkbox "Track as Asset" [checked] [ref=e2475]
+                    - generic [ref=e2476]:
+                      - generic [ref=e2477]: Service Product
+                      - text: ":"
+                    - checkbox "Service Product" [ref=e2479]
+              - status [ref=e2480]
+          - table:
+            - rowgroup:
+              - row:
+                - cell
+          - generic [ref=e2481]:
+            - navigation [ref=e2482]:
+              - tablist [ref=e2483]:
+                - tab "User Defined Attributes" [ref=e2484]:
+                  - generic [ref=e2485] [cursor=pointer]: User Defined Attributes
+                - tab "More Info" [ref=e2486]:
+                  - generic [ref=e2487] [cursor=pointer]: More Info
+                - tab "Eligibility and Compatibility Rules" [ref=e2488]:
+                  - generic [ref=e2489] [cursor=pointer]: Eligibility and Compatibility Rules
+                - tab "Pricing" [expanded] [selected] [ref=e2490]:
+                  - generic [ref=e2491]: Pricing
+                - tab "Recommendations" [ref=e2492]:
+                  - generic [ref=e2493] [cursor=pointer]: Recommendations
+                - tab "Collateral" [ref=e2494]:
+                  - generic [ref=e2495] [cursor=pointer]: Collateral
+                - tab "Translations" [ref=e2496]:
+                  - generic [ref=e2497] [cursor=pointer]: Translations
+                - tab "Service Information" [ref=e2498]:
+                  - generic [ref=e2499] [cursor=pointer]: Service Information
+                - listitem [ref=e2500]:
+                  - combobox "Third Level View Bar" [ref=e2501]:
+                    - option "Product Validation"
+                    - option "Bundle Product"
+                    - option "Category"
+                    - option "Primary Product Set"
+                    - option "Product MSISDN Group"
+                    - option "More Info"
+            - navigation [ref=e2502]:
+              - tablist [ref=e2503]:
+                - tab "Cost Lists" [ref=e2504]:
+                  - generic [ref=e2505] [cursor=pointer]: Cost Lists
+                - tab "Price Lists" [expanded] [selected] [ref=e2506]:
+                  - generic [ref=e2507]: Price Lists
+                  - text: 
+          - generic "Price Lists in Product" [ref=e2509]:
+            - link "Price Lists":
+              - /url: "#SWEApplet2"
+            - region [ref=e2510]:
+              - form "Applet" [ref=e2511]:
+                - generic [ref=e2513]:
+                  - generic [ref=e2514]:
+                    - heading "Price Lists" [level=2] [ref=e2515]
+                    - button "Price Lists:New" [ref=e2516] [cursor=pointer]
+                    - button "Price Lists:Delete" [ref=e2517] [cursor=pointer]
+                    - button "Price Lists:Query" [ref=e2518] [cursor=pointer]
+                    - generic [ref=e2519]:
+                      - 'button "Price Lists List Applet: Menu" [ref=e2522] [cursor=pointer]'
+                      - generic [ref=e2523]: 1 - 2 of 2
+                      - link "Price Lists List Applet:Show More" [ref=e2525] [cursor=pointer]:
+                        - /url: javascript:void(0)
+                        - generic "Price Lists List Applet:Show More" [ref=e2526]:
+                          - img "Price Lists List Applet:Show More"
+                  - generic [ref=e2527]:
+                    - generic [ref=e2528]:
+                      - button "Price Lists:New Effective Date" [ref=e2529] [cursor=pointer]: New Effective Date
+                      - button "Price Lists:Clear Cache" [ref=e2530] [cursor=pointer]: Clear Cache
+                    - generic [ref=e2531]:
+                      - combobox "Find" [ref=e2532]
+                      - textbox "Starting with" [ref=e2534]
+                      - button "Price Lists:Go" [ref=e2535] [cursor=pointer]: 
+                  - generic [ref=e2538]:
+                    - generic [ref=e2539]:
+                      - grid "Price List List Price Promotional Price Volume Discount Attribute Adjustment Start Date End Date Sequence Product Price List Selection Field Multiple Selection Field Currency Calculator Field Calculator Field Date Field Date Time Field Date Time Zone Field Effective Date Field Combobox Field Link Checkbox First record set Previous record set Next record set Last record set" [ref=e2542]:
+                        - rowgroup [ref=e2543]:
+                          - row "Price List List Price Promotional Price Volume Discount Attribute Adjustment Start Date End Date Sequence" [ref=e2544]:
+                            - text:  
+                            - columnheader "Price List" [ref=e2545]:
+                              - generic [ref=e2547] [cursor=pointer]: Price List  
+                            - columnheader "List Price" [ref=e2548]:
+                              - generic [ref=e2550] [cursor=pointer]: List Price  
+                            - columnheader "Promotional Price" [ref=e2551]:
+                              - generic [ref=e2553] [cursor=pointer]: Promotional Price  
+                            - columnheader "Volume Discount" [ref=e2554]:
+                              - generic [ref=e2556] [cursor=pointer]: Volume Discount  
+                            - columnheader "Attribute Adjustment" [ref=e2557]:
+                              - generic [ref=e2559] [cursor=pointer]: Attribute Adjustment  
+                            - columnheader "Start Date" [ref=e2560]:
+                              - generic [ref=e2562] [cursor=pointer]: Start Date  
+                            - columnheader "End Date" [ref=e2563]:
+                              - generic [ref=e2565] [cursor=pointer]: End Date  
+                            - columnheader "Sequence" [ref=e2566]:
+                              - generic [ref=e2568] [cursor=pointer]: Sequence  
+                      - generic [ref=e2570]:
+                        - grid "Product Price List" [ref=e2572]:
+                          - rowgroup [ref=e2573]:
+                            - row [ref=e2574]:
+                              - gridcell [ref=e2575]
+                              - gridcell [ref=e2576]
+                              - gridcell [ref=e2577]
+                              - gridcell [ref=e2578]
+                              - gridcell [ref=e2579]
+                              - gridcell [ref=e2580]
+                              - gridcell [ref=e2581]
+                              - gridcell [ref=e2582]
+                            - row "Link Selection Field Calculator Field Combobox Field Date Time Zone Field" [ref=e2583]:
+                              - gridcell "Link Selection Field" [ref=e2584]:
+                                - link "Vodafone AU Data Cleansing Price List" [ref=e2585] [cursor=pointer]:
+                                  - /url: javascript:void(0);
+                              - gridcell "Calculator Field" [ref=e2586]: $9.08
+                              - gridcell "Calculator Field" [ref=e2587]
+                              - gridcell "Link Combobox Field" [ref=e2588]
+                              - gridcell "Link Selection Field" [ref=e2589]
+                              - gridcell "Date Time Zone Field" [ref=e2590]: 02/03/2026 00:00:00
+                              - gridcell "Date Time Zone Field" [ref=e2591]
+                              - gridcell [ref=e2592]
+                            - row "Link Selection Field Calculator Field Combobox Field Date Time Zone Field" [selected] [ref=e2593]:
+                              - gridcell "Link Selection Field" [ref=e2594]:
+                                - link "Vodafone AU Price List" [ref=e2595] [cursor=pointer]:
+                                  - /url: javascript:void(0);
+                              - gridcell "Calculator Field" [ref=e2596]: $9.08
+                              - gridcell "Calculator Field" [ref=e2597]
+                              - gridcell "Link Combobox Field" [ref=e2598]
+                              - gridcell "Link Selection Field" [ref=e2599]
+                              - gridcell "Date Time Zone Field" [ref=e2600]: 02/03/2026 00:00:00
+                              - gridcell "Date Time Zone Field" [ref=e2601]
+                              - gridcell [ref=e2602]
+                        - generic "Date Time Field"
+                    - group [ref=e2604]:
+                      - row "First record set Previous record set Next record set Last record set" [ref=e2605]:
+                        - rowgroup [ref=e2606]:
+                          - row "First record set Previous record set Next record set Last record set" [ref=e2607]:
+                            - cell [ref=e2608]
+                            - cell "First record set Previous record set Next record set Last record set" [ref=e2609]:
+                              - table [ref=e2610]:
+                                - rowgroup [ref=e2611]:
+                                  - row "First record set Previous record set Next record set Last record set" [ref=e2612]:
+                                    - cell "First record set":
+                                      - generic "First record set"
+                                    - cell "Previous record set":
+                                      - generic "Previous record set"
+                                    - cell "Next record set":
+                                      - generic "Next record set"
+                                    - cell "Last record set":
+                                      - generic "Last record set"
+                            - cell [ref=e2613]
+              - status [ref=e2614]
+              - text:    
+  - text: 
+  - generic [ref=e821] [cursor=pointer]: Smart Agent
+  - status [ref=e822]
+  - status [ref=e823]
+  - status [ref=e2618]
+  - status [ref=e2619]
+  - status [ref=e2620]
+  - status [ref=e2621]
+  - status [ref=e2622]
+  - status [ref=e2623]
