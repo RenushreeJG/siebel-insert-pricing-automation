@@ -57,6 +57,42 @@ test('Insert Price List From CSV', async ({ page }) => {
             await page.getByRole('textbox', { name: 'Name Link' })
                 .fill(row.data.Product);
             await page.keyboard.press('Enter');
+             // ===============================
+            // SKIP LOGIC: Check if product was found
+            // ===============================
+            
+            // Wait a moment for search results to load
+            await page.waitForTimeout(2000);
+            
+            // Check if "No Records" is displayed - this means product was not found
+            const noRecordsVisible = await page.locator('text=No Records').isVisible();
+            
+            if (noRecordsVisible) {
+                // Product not found - skip to next row
+                console.log(`❌ Product "${row.data.Product}" not found in Siebel - skipping to next row`);
+                row.status = 'Failed';
+                row.errorMessage = 'Product not found';
+                continue; // Skip to next CSV row
+            }
+            
+            // Additional check: Verify product name appears in heading or table cells
+            const productFoundInHeading = await page.getByRole('heading', { name: row.data.Product }).isVisible().catch(() => false);
+            const productFoundInTable = await page.locator(`text="${row.data.Product}"`).first().isVisible().catch(() => false);
+            
+            if (!productFoundInHeading && !productFoundInTable) {
+                // Product not found - skip to next row
+                console.log(`❌ Product "${row.data.Product}" not found in search results - skipping to next row`);
+                row.status = 'Failed';
+                row.errorMessage = 'Product not found';
+                continue; // Skip to next CSV row
+            }
+            
+            console.log(`✅ Product "${row.data.Product}" found - proceeding with pricing logic`);
+
+            // ===============================
+            // CONTINUE WITH EXISTING PRICING LOGIC (only if product found)
+            // ===============================
+            
             // PRICING TAB
             await page.getByRole('tab', { name: 'Pricing' }).click();
             await page.getByRole('tab', { name: 'Price Lists' }).click();

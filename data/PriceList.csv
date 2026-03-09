@@ -1,4 +1,13 @@
 Product,Vodafone AU Price List,Vodafone AU Data Cleansing Price List,Categories,Vodafone AU Price List Maximum Price,Vodafone AU Data Cleansing Price List Maximum Price,Status,Error Message
-$119InfinitePlan 12Mth,108.18,108.18,VFAU CSR,108.18,108.18,Success,
-$15 MobileBband SR 1GB 12M,13.63,13.63,VFAU CSR,13.63,13.63,Success,
-$15 Tablet Plan 1GB 12M,13.63,13.63,VFAU CSR,13.63,13.63,Success,
+$29 VF SIM Only ValuePlan,26.36,26.36,VFAU CSR,26.36,26.36,Success,
+$35 Sim 12Mth,31.81,31.81,VFAU CSR,31.81,31.81,Success,
+prodtnotfound,35.45,35.45,VFAU CSR,35.45,35.45,Failed,"locator.isVisible: Error: strict mode violation: locator('text=No Records') resolved to 4 elements:
+    1) <span id=""s_1000_rc"" aria-live=""polite"" class=""siebui-row-counter"">No Records</span> aka locator('#s_1000_rc')
+    2) <span id=""s_1_rc"" aria-live=""polite"" class=""siebui-row-counter"">No Records</span> aka locator('form[name=""SWEForm1_0""]').getByText('No Records')
+    3) <span id=""s_2_rc"" aria-live=""polite"" class=""siebui-row-counter"">No Records</span> aka locator('form[name=""SWEForm2_0""]').getByText('No Records')
+    4) <span id=""s_3_rc"" aria-live=""polite"" class=""siebui-row-counter"">No Records</span> aka locator('form[name=""SWEForm3_0""]').getByText('No Records')
+
+Call log:
+[2m    - checking visibility of locator('text=No Records')[22m
+"
+$39Plan 24Mth - TXT,35.45,35.45,VFAU CSR,35.45,35.45,Success,
