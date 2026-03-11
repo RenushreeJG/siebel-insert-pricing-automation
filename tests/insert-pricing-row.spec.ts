@@ -12,12 +12,18 @@ test('Insert Price List From CSV', async ({ page }) => {
     // ===============================
     // Handle VHA Alert if it appears after login or during the process
     // ===============================
-    async function closeVhaAlert(page: Page) {
-        const alert = page.locator('#VHAOpenModalAlert');
-        if (await alert.isVisible({ timeout: 2000 }).catch(() => false)) {
-            await page.locator('.VHAAlertOKBtn').click();
-            // wait until alert fully disappears
-            await alert.waitFor({ state: 'hidden' });
+    async function dismissAlert(page: Page): Promise<void> {
+        // VHA modal alert
+        const vhaAlert = page.locator('#VHAOpenModalAlert');
+        if (await vhaAlert.isVisible({ timeout: 500 }).catch(() => false)) {
+            await page.locator('.VHAAlertOKBtn').click().catch(() => { });
+            await vhaAlert.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => { });
+            return;
+        }
+        // Generic System Error dialog
+        const systemError = page.locator('text=System Error');
+        if (await systemError.isVisible({ timeout: 500 }).catch(() => false)) {
+            await page.getByRole('button', { name: 'OK' }).click().catch(() => { });
         }
     }
     // ===============================
@@ -25,7 +31,7 @@ test('Insert Price List From CSV', async ({ page }) => {
     // ===============================
     await page.goto('https://ek4vlws0371.appc.tpgtelecom.com.au:9001/siebel/app/care/enu');
     await page.getByRole('textbox', { name: 'User ID' }).fill('SBLAUTOUSR');
-    await page.getByRole('textbox', { name: 'Password' }).fill('SBLAUTO#26');
+    await page.getByRole('textbox', { name: 'Password' }).fill('SblDevAutoUsr26');
     await page.getByRole('link', { name: 'Login' }).click();
     await expect(page.getByRole('tab', { name: 'Home' })).toBeVisible();
     // ===============================
@@ -44,7 +50,7 @@ test('Insert Price List From CSV', async ({ page }) => {
             await expect(
                 page.getByRole('heading', { name: 'Products', level: 2 })
             ).toBeVisible();
-            
+
             console.log(`Processing Row: ${row.rowNumber}`);
 
             // Ensure we are in Products list view
@@ -57,6 +63,31 @@ test('Insert Price List From CSV', async ({ page }) => {
             await page.getByRole('textbox', { name: 'Name Link' })
                 .fill(row.data.Product);
             await page.keyboard.press('Enter');
+             // ===============================
+            // SKIP LOGIC: Check if product was found
+            // ===============================
+            // Wait a moment for search results to load
+            await page.waitForTimeout(2000);
+            // Check if "No Records" is displayed - this means product was not found
+            const noRecordsVisible = await page.locator('text=No Records').first().isVisible().catch(() => false);
+            if (noRecordsVisible) {
+                // Product not found - skip to next row
+                console.log(`❌ Product "${row.data.Product}" not found in Siebel - skipping to next row`);
+                row.status = 'Failed';
+                row.errorMessage = 'Product not found';
+                continue; // Skip to next CSV row
+            }
+            // Additional check: Verify product name appears in heading or table cells
+            const productFoundInHeading = await page.getByRole('heading', { name: row.data.Product }).isVisible().catch(() => false);
+            const productFoundInTable = await page.locator(`text="${row.data.Product}"`).first().isVisible().catch(() => false);
+            if (!productFoundInHeading && !productFoundInTable) {
+                // Product not found - skip to next row
+                console.log(`❌ Product "${row.data.Product}" not found in search results - skipping to next row`);
+                row.status = 'Failed';
+                row.errorMessage = 'Product not found';
+                continue; // Skip to next CSV row
+            }
+            console.log(`✅ Product "${row.data.Product}" found - proceeding with pricing logic`);
             // PRICING TAB
             await page.getByRole('tab', { name: 'Pricing' }).click();
             await page.getByRole('tab', { name: 'Price Lists' }).click();
@@ -199,7 +230,7 @@ test('Insert Price List From CSV', async ({ page }) => {
             await page.getByRole('button', { name: 'Add Category List Applet:OK' }).click();
 
             // Handle any alert that might appear and wait for proper processing
-            await closeVhaAlert(page);
+            await dismissAlert(page);
             await page.waitForTimeout(1000); // Increased timeout for processing
 
             // Check if we need to cancel or if dialog auto-closed
