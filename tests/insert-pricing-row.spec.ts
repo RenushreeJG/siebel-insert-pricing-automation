@@ -30,19 +30,19 @@ test('Insert Price List From CSV', async ({ page }) => {
             // Check for VHA modal alert - try multiple selectors
             let modal = page.locator('#VHAOpenModalAlert.VHADisplayBlock');
             let isModalVisible = await modal.isVisible({ timeout: CONFIG.TIMEOUT.ALERT }).catch(() => false);
-            
+
             // If not found with class, try without class
             if (!isModalVisible) {
                 modal = page.locator('#VHAOpenModalAlert');
                 isModalVisible = await modal.isVisible({ timeout: CONFIG.TIMEOUT.ALERT }).catch(() => false);
             }
-            
+
             if (!isModalVisible) {
                 // Check for generic System Error dialog
                 const systemError = page.locator('text=System Error');
                 if (await systemError.isVisible({ timeout: CONFIG.TIMEOUT.ALERT }).catch(() => false)) {
                     console.log('🚨 System Error dialog detected');
-                    await page.getByRole('button', { name: 'OK' }).click().catch(() => {});
+                    await page.getByRole('button', { name: 'OK' }).click().catch(() => { });
                     await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
                     return 'System Error dialog';
                 }
@@ -54,15 +54,15 @@ test('Insert Price List From CSV', async ({ page }) => {
 
             // Try clicking the OK button with multiple strategies
             const okButton = page.locator('.VHAAlertOKBtn, #VHAOpenModalAlert .VHAAlertOKBtn');
-            
+
             // Strategy 1: Regular click
             const clicked = await okButton.click({ timeout: CONFIG.TIMEOUT.ALERT, force: true }).then(() => true).catch(() => false);
-            
+
             if (!clicked) {
                 // Strategy 2: Dispatch click event
-                await okButton.dispatchEvent('click').catch(() => {});
+                await okButton.dispatchEvent('click').catch(() => { });
             }
-            
+
             // Strategy 3: JavaScript click as last resort
             await page.evaluate(() => {
                 const btn = document.querySelector('.VHAAlertOKBtn') as HTMLElement;
@@ -70,8 +70,8 @@ test('Insert Price List From CSV', async ({ page }) => {
                     btn.click();
                     btn.dispatchEvent(new Event('click', { bubbles: true }));
                 }
-            }).catch(() => {});
-            
+            }).catch(() => { });
+
             // Wait for modal to hide
             await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
             await modal.waitFor({ state: 'hidden', timeout: CONFIG.TIMEOUT.ALERT * 4 }).catch(() => {
@@ -80,9 +80,9 @@ test('Insert Price List From CSV', async ({ page }) => {
                 page.evaluate(() => {
                     const m = document.querySelector('#VHAOpenModalAlert');
                     if (m) m.remove();
-                }).catch(() => {});
+                }).catch(() => { });
             });
-            
+
             // Additional stabilization delay
             await page.waitForTimeout(CONFIG.TIMEOUT.DELAY);
             return message;
@@ -152,26 +152,26 @@ test('Insert Price List From CSV', async ({ page }) => {
             // Dismiss any VHA/System alert that may block results, then allow UI to update
             await dismissAlert(page);
             await page.waitForTimeout(CONFIG.TIMEOUT.DELAY * 4);
-             // ===============================
+            // ===============================
             // SKIP LOGIC: Check if product was found
             // ===============================
             // Wait a moment for search results to load
             await page.waitForTimeout(2000);
-            
+
             console.log(`🔎 Checking search results for: "${row.data.Product}"`);
-            
+
             // Check if "No Records" is displayed - this means product was not found
             const noRecordsVisible = await page.locator('text=No Records').first().isVisible().catch(() => false);
             console.log(`   "No Records" visible: ${noRecordsVisible}`);
-            
+
             if (noRecordsVisible) {
                 // Capture page state for debugging
                 const safeName = String(row.data.Product).replace(/[^a-z0-9]/gi, '_').slice(0, 50);
                 const outPng = path.join('test-results', `row-${row.rowNumber}-${safeName}.png`);
                 const outHtml = path.join('test-results', `row-${row.rowNumber}-${safeName}.html`);
-                await page.screenshot({ path: outPng, fullPage: true }).catch(() => {});
+                await page.screenshot({ path: outPng, fullPage: true }).catch(() => { });
                 const html = await page.content().catch(() => '');
-                await fs.promises.writeFile(outHtml, html).catch(() => {});
+                await fs.promises.writeFile(outHtml, html).catch(() => { });
                 console.log(`📎 Saved debug artifacts: ${outPng}, ${outHtml}`);
 
                 // Product not found - skip to next row
@@ -192,15 +192,6 @@ test('Insert Price List From CSV', async ({ page }) => {
             console.log(`   Found in page title: ${pageTitleContains}`);
 
             if (!productFound) {
-                // Capture page state for debugging
-                const safeName = String(row.data.Product).replace(/[^a-z0-9]/gi, '_').slice(0, 50);
-                const outPng = path.join('test-results', `row-${row.rowNumber}-${safeName}.png`);
-                const outHtml = path.join('test-results', `row-${row.rowNumber}-${safeName}.html`);
-                await page.screenshot({ path: outPng, fullPage: true }).catch(() => {});
-                const html = await page.content().catch(() => '');
-                await fs.promises.writeFile(outHtml, html).catch(() => {});
-                console.log(`📎 Saved debug artifacts: ${outPng}, ${outHtml}`);
-
                 // Product not found - skip to next row
                 console.log(`❌ Product "${row.data.Product}" not found in search results - skipping to next row`);
                 row.status = 'Failed';
@@ -505,7 +496,7 @@ test('Insert Price List From CSV', async ({ page }) => {
             row.status = 'Failed';
             row.errorMessage = error?.message || 'Unknown error';
         }
-        
+
         processed++;
     }
     await writeStatus(dataConfig, rows);

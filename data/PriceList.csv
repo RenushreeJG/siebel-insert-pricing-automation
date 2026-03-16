@@ -1,4 +1,9 @@
 Product,Vodafone AU Price List,Vodafone AU Data Cleansing Price List,Categories,Vodafone AU Price List Maximum Price,Vodafone AU Data Cleansing Price List Maximum Price,Status,Error Message
-$119InfinitePlan 12Mth,108.18,108.18,VFAU CSR,108.18,108.18,Success,
-$15 MobileBband SR 1GB 12M,13.63,13.63,VFAU CSR,13.63,13.63,Success,
-$15 Tablet Plan 1GB 12M,13.63,13.63,VFAU CSR,13.63,13.63,Success,
+Test1111,35.45,35.45,VFAU CSR,35.45,35.45,Failed,Product not found
+$39Plan 24Mth - TXT,35.45,35.45,VFAU CSR,35.45,35.45,Success,
+$40 Plan 12m - ON,36.36,36.36,VFAU CSR,36.36,36.36,Success,
+$49 Cap for iPhone 3G_24M,44.54,44.54,VFAU CSR,44.54,44.54,Success,
+Test2111,44.54,44.54,VFAU CSR,44.54,44.54,Failed,Product not found
+$49 VF ValuePlan,44.54,44.54,VFAU CSR,44.54,44.54,Success,
+$49Plan 12Mth - ON,44.54,44.54,VFAU CSR,44.54,44.54,Success,
+Test3111,44.54,44.54,VFAU CSR,44.54,44.54,Failed,Product not found
